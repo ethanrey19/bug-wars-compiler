@@ -1,5 +1,6 @@
 package me.ethan;
 
+import me.ethan.exceptions.InvalidCommandException;
 import me.ethan.exceptions.InvalidLabelException;
 
 import java.util.*;
@@ -17,8 +18,8 @@ public class Compiler {
                     "     GOTO EAT\n";
             List<String> tokens = convertToTokens(script); // convert script into individual tokens
             List<Byte> bytecode = convertToBytecode(tokens); // convert tokens into the bytecode
-            System.out.println(tokens);
-            System.out.println(bytecode);
+            System.out.println("Script into tokens " + tokens);
+            System.out.println("Tokens into bytecode " + bytecode);
     }
 
     private static List<String> convertToTokens(String script) {
@@ -59,17 +60,31 @@ public class Compiler {
         // jerry said to do it this way. so blame him
         for(int i = 0; i < tokens.size(); i++){
             String token = tokens.get(i);
-            if (isActionCommand(token)){
+            if(labels.containsKey(token.substring(1))) {
+                System.out.println(token);// nothin
+            }else if (isActionCommand(token)){
                 bytecode.add(actionCommands.get(token));
             } else if (isConditionalCommand(token)){
                 bytecode.add(conditionals.get(token));
                 String label = tokens.get(i+1);
+                if(!labels.containsKey(label)){
+                    try {
+                        throw new InvalidLabelException("Label \"" + label + "\" does not exist");
+                    } catch (InvalidLabelException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 bytecode.add(labels.get(label));
+                i++;
             } else {
+                try {
+                    throw new InvalidCommandException("Invalid Command: " + token);
+                } catch (InvalidCommandException e) {
+                    throw new RuntimeException(e);
+                }
                 // this is a target, you can ignore
             }
         }
-        System.out.println(labels);
         return bytecode;
     }
 
@@ -93,6 +108,7 @@ public class Compiler {
                 instructionPointer++;
             }
         }
+        System.out.println("ALL LABELS" + labels);
         return labels;
     }
 
