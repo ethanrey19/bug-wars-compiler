@@ -9,6 +9,7 @@ public class Compiler {
     private static final Map<String,Byte> conditionals = getConditionalCommands();
     private static final Map<String,Byte> actionCommands = getActionCommands();
 
+
     public static void main(String[] args) {
             String script = ":START  attack\n" +
                     "     moveForward\n" +
